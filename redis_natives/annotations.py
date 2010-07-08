@@ -25,7 +25,7 @@ def _temporaryWrapper(attr, arg, cls):
     return cls
 
 def temporary(after=None, at=None):
-    """Marks created keys as temporary. They will be destroyed automatically
+    """Marks created keys as volatile. They will be destroyed automatically
     ``after`` seconds or at given time ``at``.
     """
     if after is at is None:
@@ -49,13 +49,14 @@ def namespaced(ns="", sep=":"):
     """
     if type(ns) is type(sep) is str:
         return partial(_namespacedWrapper, ns, sep)
-    return _namespacedWrapper("", "", ns)
+    return lambda cls: cls
 
 def _indexedWrapper(rSet, cls):
     def hook(rDatatype):
         rSet.add(rDatatype.key)
         return rDatatype
     cls.after_create.append(hook)
+    return cls
 
 def indexed(index=None):
     """Keeps track of all created keys by adding them to the ``RedisSet``
