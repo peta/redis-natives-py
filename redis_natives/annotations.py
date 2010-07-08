@@ -18,7 +18,6 @@ __all__ = (
 
 
 def _temporaryWrapper(attr, arg, cls):
-    print attr + ": " + str(arg)        
     def hook(rDatatype):
         getattr(rDatatype, attr)(arg)
         return rDatatype    
@@ -41,8 +40,6 @@ def temporary(after=None, at=None):
         return partial(_temporaryWrapper, attr, arg)
 
 def _namespacedWrapper(ns, sep, cls):
-    print "ns: " + ns
-    print "sep: " + sep
     cls.before_create.append(lambda key: ns + sep + key)
     return cls
     
@@ -55,7 +52,6 @@ def namespaced(ns="", sep=":"):
     return _namespacedWrapper("", "", ns)
 
 def _indexedWrapper(rSet, cls):
-    print "tracking '" + cls.__name__ + "' by '" + rSet.key + "'"
     def hook(rDatatype):
         rSet.add(rDatatype.key)
         return rDatatype
@@ -71,7 +67,6 @@ def indexed(index=None):
         return partial(_indexedWrapper, index)
 
 def _incrementalWrapper(rPrim, cls):
-    print "set incremental for '" + cls.__name__ + "'"
     def hook(rDatatype):
         rPrim.incr()
         return rDatatype
