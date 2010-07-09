@@ -51,7 +51,7 @@ class RedisDataType(object):
     
     @key.setter
     def key(self, val):
-        self._key = val        
+        self.rename(val)      
         
     def type(self):
         """Return the internal name of a datatype. (Specific to Redis)
