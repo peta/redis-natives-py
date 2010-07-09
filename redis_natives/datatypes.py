@@ -200,7 +200,7 @@ class Primitive(RedisDataType):
         '''
         # Should I check for by-value and use 'incr' when appropriate?
         try:
-            return self._client.incrby(self.key, by)
+            return self._client.incr(self.key, by)
         except ResponseError:
             raise RedisTypeError(
                 "Cannot increment Primitive with string-value")    
