@@ -58,7 +58,7 @@ def _indexedWrapper(rSet, cls):
     cls.after_create.append(hook)
     return cls
 
-def indexed(index=None):
+def indexed(index):
     """Keeps track of all created keys by adding them to the ``RedisSet``
     named ``index``.
     """
@@ -83,6 +83,8 @@ def incremental(rPrim=None):
     else:
         return partial(_incrementalWrapper, rPrim) 
 
+
+def 
 
 if __name__ == "__main__":
     pass
