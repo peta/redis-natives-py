@@ -82,10 +82,11 @@ class RedisNativeFactory(object):
             raise AttributeError("Property " + name + " doesn't exist")
         
     @staticmethod
-    def _createInstance(cls, templateCls, key, value, *ka, **kwa):
+    def _createInstance(cls, templateCls, key=None, *ka, **kwa):
+        key = "" if (key is None) else key
         for beforeHook in cls.before_create:
             key = beforeHook(key)
-        inst = templateCls(cls.client, key, value, *ka, **kwa)
+        inst = templateCls(cls.client, key, *ka, **kwa)
         for afterHook in cls.after_create:
             afterHook(inst)
         return inst    
