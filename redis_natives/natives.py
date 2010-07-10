@@ -42,7 +42,7 @@ class RedisNativeFactory(object):
         @namespaced("hit")
         @indexed(myHitIndex)
         @incremental(myHitCounter)
-        def HitFactory(RedisNativeFactory):
+        class HitFactory(RedisNativeFactory):
             client = Redis(db=1)
             before_create = []
             after_create = []
