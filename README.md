@@ -4,7 +4,7 @@ A thin abstraction layer on top of [redis-py](http://github.com/andymccurdy/redi
 exposes Redis entities as native Python datatypes. Simple, plain but powerful. No ORMing 
 or model-messing -- this isn't the real purpose of high performance key-value-stores like Redis.
 
-- - - -
+---
 
 # Available datatypes #
 
@@ -21,7 +21,7 @@ all datatypes marked with __*__ implement (almost) exactly the same interface as
 That allows for a whole range of new use-cases which don't have to be directly connected to the
 persistence/database layer.
 
-- - - -
+---
 
 # Features #
 
@@ -29,7 +29,7 @@ persistence/database layer.
 * Support for key namespaces along with other utilities (see __RedisNativeFactory__ and __annotations__)
 * Most datatypes implement same interface as builtin pendants -- uncomplicated integration in existing systems
 
-- - - -
+---
 
 # FAQ #
 
@@ -43,14 +43,14 @@ as small as possible. Reliable profiling result and further code improvements wi
 When you have questions or problems with _redis-natives-py_ please contact me via email or
 file a bug/ticket in the issue tracker.
 
-- - - -
+---
 
 # Demo: URL shorter service (Will follow soon)#
 
 Interesting demo project that shows how to use _redis-natives-py_ together with [bottle.py]() 
 in order to write a full-fledged URL shortener service that even offers hit tracking and statistics.
 
-- - - -
+---
 
 # Examples & Further informations #
 
@@ -66,24 +66,24 @@ two lines in every example so don't wonder where ``rClient`` and ``rnatives`` ar
 	# Our Redis client instance
 	rClient = Redis()
 
-## Functionality shared by _all_ datatypes ##
+### Functionality shared by _all_ datatypes ###
 
-All datatypes share the following interface that allows you to perform redis-specific tasks
+All datatypes share the following methods/properties that allow you to perform Redis-specific tasks
 directly on the entity/instance you want:
 
 * Getter/setter property called ``key``. Changes will be reflected to the store immediately.
 * ``type()`` return the Redis-internal datatype name of the associated value
 * ``move(redisClient/id)`` moves the key into the database currently selected in the given ``Redis`` instance or described by integer ``id``
 * ``rename(newKey, overwrite=True)`` renames the current entity-key to ``newKey`` overwriting an exisiting key with the same name if ``overwrite`` is ``True``
-* Property ``expiration`` yields the remaining time in seconds when the entity was marked as volatile before
+* Property ``expiration`` yields the remaining time in seconds until the entity will be destroyed when it was marked as volatile before
 * ``let_expire(nSecs)`` marks the entity as volatile and determines that it will be automatically destroyed in ``nSecs``
 * ``let_expire_at(timestamp)`` same as line above, but this time it will be destroyed at given time ``timestamp``
 
 
-## Primitives ##
+## Primitive ##
 
-You can work with Primitives exactly as you'd like to with builtin Strings. Primitives expose the 
-same interface as String plus a bit more.
+You can work with ``Primitive`` exactly as you'd like to with builtin Strings. Primitives expose the 
+same interface as String plus something more.
 
 	from rn.datatypes import Primitive
 
@@ -103,6 +103,75 @@ for incr-/decrementing values.
 	myCounter.decr(2)
 	# >> 4
 
-## Sets ##
+## Set ##
 
-You can work with Sets exactly as you'd like to with builtin Sets.
+You can work with ``Set`` exactly as you'd like to with builtin Sets. Set operations like ``difference`` and 
+``intersection`` are of course performed completely on the datastore-side. You even can pass an arbitrary number of Python sets 
+and operate with them.
+
+	# No need to give an example on native Python Sets
+
+#### Special methods ####
+
+``Set`` has an additional method called ``grab()`` that simply returns a random element from the ``Set``.
+
+#### Restrictions ####
+
+At the moment ``Set`` doesn't support the methods ``issubset(*others)`` and ``issuperset(other)``. But I will add them 
+soon. 
+
+	
+## ZSet ##
+
+A special datatype is the ``ZSet`` -- an ordered set. The main characteristic is the concept of a 
+score associated to every set element.
+
+	from rn.datatypes import ZSet
+
+	mostPopular = ZSet(rClient, "rank:messages")
+	mostPopular.add("message:123", 0)
+	mostPopular.incr_score("message:123")
+	mostPopular.rank_of("message:123")
+	# > 1
+	
+And when you want to query the 10 most popular messages:
+
+	from random import randint
+	from rn.datatypes import ZSet
+
+	mostPopular = ZSet(rClient, "rank:messages")
+	
+	for i in range(20):
+		mostPopular.add("message:%s" % i, 0)
+	for i in range(20):
+		mostPopular.incr_score("message:%s" % randint(0, 19))
+	# Will return the Top-10
+	mostPopular.range_by_rank(0, 10, ZOrder.DESC)
+ 
+## Dict ##
+
+You can work with ``Dict`` exactly as you'd like to with builtin Dicts. 
+
+	# No need to give an example on native Python Dicts
+
+#### Special methods ####
+
+``Set`` has an additional method called ``incr(key, by=1)`` that increments the value associated to ``key`` 
+by a given ``int``.
+
+## Sequence ##
+
+The ``Sequence`` datatype implements all functions of ``Redis list`` datatypes. 
+Compared to ``List``, a ``Sequence`` doesn't try to meme a native 
+``list`` datatype but instead exposes all native functionalities of Redis 
+for working with list datatypes.
+
+A typical use-case where this functionality is needed are f.e. FIFO/LIFO 
+processings. (stacks/queues)
+
+	lookupQueue = Sequence(rClient, "ipLookups")
+	lookupQueue.push_head("123.123.123.123")
+	lookupQueue.push_head("124.124.124.124")
+	lookupQueue.pop_tail()
+	# > 123.123.123.123
+
