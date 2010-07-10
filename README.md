@@ -4,8 +4,6 @@ A thin abstraction layer on top of [redis-py](http://github.com/andymccurdy/redi
 exposes Redis entities as native Python datatypes. Simple, plain but powerful. No ORMing 
 or model-messing -- this isn't the real purpose of high performance key-value-stores like Redis.
 
----
-
 # Available datatypes #
 
 * Primitive* (string)
@@ -40,15 +38,7 @@ When you have questions or problems with _redis-natives-py_ please contact me vi
 file a bug/ticket in the issue tracker.
 
 
-# Demo: URL shorter service (Will follow soon)#
-
-Interesting demo project that shows how to use _redis-natives-py_ together with [bottle.py]() 
-in order to write a full-fledged URL shortener service that even offers hit tracking and statistics.
-
-
-# Examples & Further informations #
-
-
+# Examples - Datatypes #
 
 Though _redis-natives-py_ bases on [redis-py](http://github.com/andymccurdy/redis-py) it is
 assumed that you already have it installed and made it working properly. I will omit the following
@@ -60,7 +50,7 @@ two lines in every example so don't wonder where ``rClient`` and ``rnatives`` ar
 	# Our Redis client instance
 	rClient = Redis()
 
-### Functionality shared by _all_ datatypes ###
+## Functionality shared by _all_ datatypes ##
 
 All datatypes share the following methods/properties that allow you to perform Redis-specific tasks
 directly on the entity/instance you want:
@@ -169,3 +159,143 @@ processings. (stacks/queues)
 	lookupQueue.pop_tail()
 	# > 123.123.123.123
 
+
+# Examples - Annotations & RedisNativeFactory #
+
+When you work with with ``redis_natives`` it might become odd to everytime pass in an instance of ``redis.Redis`` or 
+to keep track created keys. Even more when you work with pseudo-namespaces (f.e. "global:counter:message") and construct 
+the key names in advance. That's why I introduced ``annotations`` that can be applied to a custom ``RedisNativeFactory`` 
+subclass.
+
+## @namespaced(ns, sep=":") ##
+
+To implicitly embed created keys in one or more namespaces, you use the annotation called ``namespaced(ns, sep=":")``.
+They're applied using the decorator syntax to you custom ``RedisNativeFactory`` subclass. Namespaces are constructed from 
+top to bottowm whereat you can combine as many namespaces as you like.
+
+	from rn.natives import RedisNativeFactory
+	from rn.datatypes import Primitive
+	from rn.annotations import namespaced
+
+	@namespaced("a")
+	@namespaced("b")
+	@namespaced("c")
+	class FooFactory(RedisNativeFactory):
+	    client = rClient
+	    before_create = []
+	    after_create = []
+
+	fk = FooFactory().Primitive("fooKey", "barValue")
+	print fk
+	# > barValue
+	print fk.key
+	# > a:b:c:fooKey
+
+## @temporary(after=None, at=None) ##
+
+To implicity mark all keys created by a specific ``RedisNativeFactory`` as volatile, you use the annotation called ``@temporary(after=None, at=None)``.
+You can either specify if a entity should be automatically destroyed ``after`` a given number of seconds or ``at`` a given timestamp.
+
+__Note Redis' [special handling of volatile keys](http://code.google.com/p/redis/wiki/ExpireCommand)__
+
+	from time import sleep
+
+	from rn.natives import RedisNativeFactory
+	from rn.datatypes import Primitive
+	from rn.annotations import temporary
+
+	@temporary(after=10)
+	class FooFactory(RedisNativeFactory):
+	    client = rClient
+	    before_create = []
+	    after_create = []
+
+	fk = FooFactory().Primitive("fooKey", "Gone in 10 seconds")
+	print fk.expiration
+	# > 10
+	sleep(10)
+	print rClient.exists(fk.key)
+	# > False
+	print fk
+	# > TypeError: __repr__ returned non-string (type NoneType)
+
+## @indexed(idxSet) ##
+
+When you keep reversed/additional indexes of certain entities the annotation called ``indexed(idxSet)`` will be handy for you. 
+For every entity created by the annotated ``RedisNativeFactory`` it will automatically add the entity's key to the given Redis ``Set`` 
+``idxSet``.
+
+	from rn.natives import RedisNativeFactory
+	from rn.datatypes import Primitive, Set
+	from rn.annotations import indexed
+
+	myIndex = Set(rClient, "global:index:createdToday")
+
+	@indexed(myIndex)
+	class FooFactory(RedisNativeFactory):
+	    client = rClient
+	    before_create = []
+	    after_create = []
+
+	FooFactory().Primitive("fooKey", "I'm listed in global:index:createdToday too!")
+	print myIndex
+	# > set(["fooKey"])
+
+## @incremental(rPrim) ##
+
+When you annotate a ``RedisNativeFactory`` with ``@incremental(rPrim)`` the given Redis ``Primitive`` ``rPrim`` will be incremented 
+by value 1 for every entity created.
+
+	from rn.natives import RedisNativeFactory
+	from rn.datatypes import Primitive
+	from rn.annotations import incremental
+
+	myCounter = Primitive(rClient, "global:counter:messages")
+
+	@incremental(myCounter)
+	class FooFactory(RedisNativeFactory):
+	    client = rClient
+	    before_create = []
+	    after_create = []
+
+	ff = FooFactory().Primitive
+	for i in range(100):
+		ff("id-%s" % i, "msgbody-%s" % i)
+	print myCounter
+	# > 100
+
+
+## @autonamed(obj) ##
+
+Instead of passing a key-name for every entity to the Datatype constructor, you pass an __arbitrary__ object that is 
+__representable as ``str``__ and everytime an entity creation is triggered, ``obj`` is asked to return a ``str`` 
+representation of itself that will be used as key name.
+
+	from rn.natives import RedisNativeFactory
+	from rn.datatypes import Primitive
+	from rn.annotations import incremental, autonamed
+
+	myCounter = Primitive(rClient, "global:counter:messages", 0)
+
+	@incremental(myCounter)
+	@autonamed(myCounter)
+	class FooFactory(RedisNativeFactory):
+	    client = rClient
+	    before_create = []
+	    after_create = []
+
+	ff = FooFactory().Primitive
+	for i in range(100):
+		latestKey = ff("id-", "msgbody-%s" % i)
+	print myCounter
+	# > 100
+	print latestKey.key + ": " + latestKey
+	# > id-100: msgbody-99
+
+_Note that ``latestKey.key`` has 100 as suffix just because the annotation ``incremental`` was applied before ``autonamed``. Switch 
+their order, and ``latestKey.key`` will have the same suffix as the message body._
+
+# Demo: URL shorter service (Will follow soon) #
+
+Interesting demo project that shows how to use _redis-natives-py_ together with [bottle.py]() 
+in order to write a full-fledged URL shortener service that even offers hit tracking and statistics.
