@@ -21,15 +21,11 @@ all datatypes marked with __*__ implement (almost) exactly the same interface as
 That allows for a whole range of new use-cases which don't have to be directly connected to the
 persistence/database layer.
 
----
-
 # Features #
 
 * Bound instances; no caching; changes are immediately reflected to the dstore
 * Support for key namespaces along with other utilities (see __RedisNativeFactory__ and __annotations__)
 * Most datatypes implement same interface as builtin pendants -- uncomplicated integration in existing systems
-
----
 
 # FAQ #
 
@@ -43,14 +39,12 @@ as small as possible. Reliable profiling result and further code improvements wi
 When you have questions or problems with _redis-natives-py_ please contact me via email or
 file a bug/ticket in the issue tracker.
 
----
 
 # Demo: URL shorter service (Will follow soon)#
 
 Interesting demo project that shows how to use _redis-natives-py_ together with [bottle.py]() 
 in order to write a full-fledged URL shortener service that even offers hit tracking and statistics.
 
----
 
 # Examples & Further informations #
 
@@ -156,7 +150,7 @@ You can work with ``Dict`` exactly as you'd like to with builtin Dicts.
 
 #### Special methods ####
 
-``Set`` has an additional method called ``incr(key, by=1)`` that increments the value associated to ``key`` 
+``Dict`` has an additional method called ``incr(key, by=1)`` that increments the value associated to ``key`` 
 by a given ``int``.
 
 ## Sequence ##
