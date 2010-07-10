@@ -281,15 +281,12 @@ class Set(RedisSortable):
         """
 		Add element ``el`` to this ``Set``
         """
-        print "add"
-        print el
         return self._client.sadd(self.key, el)
     
     def clear(self):
         """
         Purge/delete all elements from this set
         """
-        print "clear"
         return self._client.delete(self.key)
     
     def copy(self, key):
@@ -304,7 +301,6 @@ class Set(RedisSortable):
         """
         Return the difference between this set and others as new set
         """
-        print "difference"
         rsetKeys, setElems = self._splitBySetType(*others)
         rsetElems = self._client.sdiff(rsetKeys)
         return rsetElems.difference(setElems)
@@ -313,7 +309,6 @@ class Set(RedisSortable):
         """
         Remove all elements of other sets from this set
         """
-        print "difference_update"
         pipe = self._pipe
         for el in self.difference(*others):
             pipe.srem(self.key, el)
@@ -325,14 +320,12 @@ class Set(RedisSortable):
         """
         Remove ``member`` form this set; Do nothing when element is not a member.
         """
-        print "discard"
         self._client.srem(self.key, member)
     
     def intersection(self, *others):
         """
         Return the intersection of this set and others as new set
         """
-        print "intersection"
         rsetKeys, setElems = self._splitBySetType(*others)
         rsetElems = self._client.sinter(rsetKeys)
         return rsetElems.intersection(setElems)
@@ -341,7 +334,6 @@ class Set(RedisSortable):
         """
         Update this set with the intersection of itself and others
         """
-        print "intersection_update"
         pipe = self._pipe
         for el in self.intersection(*others):
             pipe.srem(self.key, el)
@@ -354,7 +346,6 @@ class Set(RedisSortable):
         Remove and return a random element; When ``noRemove`` is ``True``
         element will not be removed. Raises ``KeyError`` if  set is empty.
         """
-        print "pop with" + "out remove" if noRemove else " remove"
         if noRemove:
             return self._client.srandmember(self.key)
         else:
@@ -365,7 +356,6 @@ class Set(RedisSortable):
         Remove element ``el`` from this set. ``el`` must be a member, 
         otherwise a ``KeyError`` is raised.
         """
-        print "remove"
         if not self._client.srem(self.key, el):
             raise RedisKeyError("Redis#%s, %s: Element '%s' doesn't exist" % \
                                 (self._client.db, self.key, el))
@@ -374,7 +364,6 @@ class Set(RedisSortable):
         """
         Return the symmetric difference of this set and others as new set
         """
-        print "symmetric_difference"
         rsetKeys, setElems = self._splitBySetType(*others)
         # server-side caching
         baseKey = int(time())
@@ -391,7 +380,6 @@ class Set(RedisSortable):
         """
         Update this set with the symmetric difference of itself and others
         """
-        print "symmetric_difference_update"
         pipe = self._pipe
         # Probably faster than getting another diff + iteratively deleting then
         pipe.delete(self.key)
@@ -405,7 +393,6 @@ class Set(RedisSortable):
         """
         Return the union of this set and others as new set
         """
-        print "union"
         rsetKeys, setElems = self._splitBySetType(*others)
         rsetElems = self._client.sunion(rsetKeys)
         return rsetElems.union(setElems)
@@ -414,7 +401,6 @@ class Set(RedisSortable):
         """
         Update a set with the union of itself and others
         """
-        print "update"
         pipe = self._pipe
         pipe.delete(self.key)
         for el in self.union(*others):
@@ -425,7 +411,6 @@ class Set(RedisSortable):
         """
         Return ``True`` if this set and ``others`` have null intersection
         """
-        print "isdisjoint"
         rsetKeys, setElems = self._splitBySetType(*others)
         rsetElems = self._client.sinter(rsetKeys)
         return rsetElems.isdisjoint(setElems)
@@ -739,25 +724,20 @@ class Dict(RedisDataType, MutableMapping):
         return Dict(dstKey, self._client)
     
     def items(self):
-        print "items"
         # dict.items() returns a list with k,v-tuples -- and so do we
         allItems = self._client.hgetall(self.key)
         return zip(allItems.keys(), allItems.values())
     
     def iteritems(self):
-        print "iteritems"
         return self._client.hgetall(self.key).iteritems()
         
     def iterkeys(self):
-        print "iterkeys"
         return iter(self._client.hkeys(self.key))
     
     def itervalues(self):
-        print "itervalues"
         return iter(self._client.hvals(self.key))
     
     def keys(self):
-        print "keys"
         return self._client.hkeys(self.key)
     
     # Inherited mixin methods:
@@ -766,11 +746,9 @@ class Dict(RedisDataType, MutableMapping):
     #   - popdef
     
     def setdefault(self):
-        print "setdefault"
         raise NotImplementedError("Method 'setdefault' is not yet implemented")
     
     def update(self, other, **others):
-        print "update"
         pairs = []
         if hasattr(other, "keys"):
             for k in other:
@@ -784,7 +762,6 @@ class Dict(RedisDataType, MutableMapping):
         self._client.hsset(self.key, pairs)
     
     def values(self):
-        print "values"
         return self._client.hvals(self.key)
     
     #===========================================================================
@@ -792,7 +769,6 @@ class Dict(RedisDataType, MutableMapping):
     #=========================================================================== 
     
     def incr(self, key, by=1):
-        print "incr"
         return self._client.hincrby(self.key, key, by)
         
         
