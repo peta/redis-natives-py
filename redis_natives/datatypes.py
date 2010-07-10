@@ -18,6 +18,7 @@ __all__ = (
     "Primitive",
     "Set",
     "ZSet",
+    "ZOrder",
     "Dict", 
     "List",
     "Sequence"
