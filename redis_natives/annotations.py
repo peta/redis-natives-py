@@ -43,7 +43,7 @@ def _namespacedWrapper(ns, sep, cls):
     cls.before_create.append(lambda key: ns + sep + key)
     return cls
     
-def namespaced(ns="", sep=":"):
+def namespaced(ns, sep=":"):
     """Embeds all created in a given namespace by prefixing their
     keys with namespace ``ns`` and separator ``sep``.
     """
@@ -58,14 +58,14 @@ def _indexedWrapper(rSet, cls):
     cls.after_create.append(hook)
     return cls
 
-def indexed(index):
+def indexed(idxSet):
     """Keeps track of all created keys by adding them to the ``RedisSet``
     named ``index``.
     """
-    if not isinstance(index, Set):
+    if not isinstance(idxSet, Set):
         return lambda cls: cls
     else:
-        return partial(_indexedWrapper, index)
+        return partial(_indexedWrapper, idxSet)
 
 def _incrementalWrapper(rPrim, cls):
     def hook(rDatatype):
@@ -74,7 +74,7 @@ def _incrementalWrapper(rPrim, cls):
     cls.after_create.append(hook)
     return cls
 
-def incremental(rPrim=None):
+def incremental(rPrim):
     """Increments ``RedisPrimitive`` ``rPrim`` by value 1 for each
     created key.
     """
@@ -83,8 +83,20 @@ def incremental(rPrim=None):
     else:
         return partial(_incrementalWrapper, rPrim) 
 
+def _autonamedWrapper(name, cls):
+    cls.before_create.append(lambda key: key + str(name))
+    return cls
 
-def 
+def autonamed(obj):
+    """Instead of passing a key-name for every entity to the Datatype constructor, 
+    you pass an arbitrary object that is representable as ``str`` and everytime 
+    an entity creation is triggered, ``obj`` is asked to return a ``str`` representation 
+    that will be used as key name.
+    """
+    if hasattr(obj, "__str__"):
+        return partial(_autonamedWrapper, obj)
+    return lambda cls: cls 
+
 
 if __name__ == "__main__":
     pass
