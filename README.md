@@ -167,6 +167,18 @@ to keep track created keys. Even more when you work with pseudo-namespaces (f.e.
 the key names in advance. That's why I introduced ``annotations`` that can be applied to a custom ``RedisNativeFactory`` 
 subclass.
 
+## RedisNativeFactory ##
+
+Creates instances of Redis natives with a preset ``Redis`` client and one or more optional annotation hooks. Normally 
+you won't use ``RedisNativeFactory`` directly, instead create a custom subclass for every entity type requirement you
+have. Create as many subclasses as you want/need whereby you can annotate each subclass individually.
+
+Note 1: You should override the inherited ``before_create`` and ``after_create`` lists with new ones, otherwise the 
+annotations you add will be applied to *all* ``RedisNativeFactory`` subclasses. 
+
+Note 2: ``RedisNativeFactory`` is implemented as Singleton. Instead of requesting the shared instance over and over again, keep a reference to
+the returned instance (basically a constructor function) under an appropriately named variable.
+
 ## @namespaced(ns, sep=":") ##
 
 To implicitly embed created keys in one or more namespaces, you use the annotation called ``namespaced(ns, sep=":")``.
