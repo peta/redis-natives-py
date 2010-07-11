@@ -691,6 +691,10 @@ class Dict(RedisDataType, MutableMapping):
     def __contains__(self, key):
         return self._client.hexists(self.key, key)
     
+    def __getattr__(self, name):
+        # Kinda magic-behaviour
+        return self._client.hget(self.key, key)
+    
     def __getitem__(self, key):
         val = self._client.hget(self.key, key)
         if val is None:
