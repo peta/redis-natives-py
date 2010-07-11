@@ -133,9 +133,10 @@ class Primitive(RedisDataType):
     
     __slots__ = ("_key", "_client", "_pipe")
     
-    def __init__(self, client, key, value=""):
+    def __init__(self, client, key, value=None):
         super(Primitive, self).__init__(client, key)
-        self.value = str(value)
+        if value is not None:
+            self.value = str(value)
            
     #===========================================================================
     # Built-in methods
