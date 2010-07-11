@@ -680,10 +680,8 @@ class Dict(RedisDataType, MutableMapping):
     def __init__(self, client, key, iter=None):
         super(Dict, self).__init__(client, key)
         if hasattr(iter, "iteritems") and len(iter):
-            # TODO: What if the key already exists?
-            pairs = []
-            map(lambda it: pairs.extend(it), iter.iteritems())            
-            self._client.hmset(self.key, pairs)
+            # TODO: What if the key already exists?         
+            self._client.hmset(self.key, iter)
     
     #===========================================================================
     # Built-in methods
@@ -1021,7 +1019,7 @@ class Sequence(RedisSortable, Sequence):
         # ---> http://code.google.com/p/redis/wiki/BlpopCommand
         return self._client.blpop(keys.insert(0, self.key), timeout)
     
-    def bpop_tail(self, timeout, *keys):
+    def bpop_tail(self, keys=[], timeout=0):
         """
         ``pop_tail`` a value off of the first non-empty list named in the 
         ``keys`` list and return it together with the ``key`` that unblocked 
@@ -1035,7 +1033,9 @@ class Sequence(RedisSortable, Sequence):
         """
         # For more informations about blocking operations see:
         # ---> http://code.google.com/p/redis/wiki/BlpopCommand
-        return self._client.brpop(keys.insert(0, self.key), timeout)
+        k = [self.key]
+        k.extend(keys)
+        return self._client.brpop(k, timeout)
     
     def pop_tail_push_head(self, dstKey):
         """
