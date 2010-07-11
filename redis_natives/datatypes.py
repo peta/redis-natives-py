@@ -708,6 +708,12 @@ class Dict(RedisDataType, MutableMapping):
         if not self._client.hdel(self.key, key):
             raise RedisKeyError("Cannot delete field '" + key + \
                                 "'. It doesn't exist") 
+    
+    def __str__(self):
+        return str(self.__repr__())
+    
+    def __repr__(self):
+        return self._client.hgetall(self.key)
         
     #===========================================================================
     # Native set methods
