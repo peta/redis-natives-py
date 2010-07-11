@@ -36,7 +36,7 @@ class RedisDataType(object):
     def __init__(self, client, key):
         if not isinstance(key, str):
             raise RedisTypeError("Key must be type of string")
-        self._key = key
+        self._key = str(key)
         if isinstance(client, Redis):
             self._client = client
             # Offer it by for bulk-commands
