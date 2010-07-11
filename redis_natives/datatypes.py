@@ -53,7 +53,14 @@ class RedisDataType(object):
     @key.setter
     def key(self, val):
         self.rename(val)      
-        
+    
+    @property
+    def exists(self):
+        """Returns ``True`` if an associated entity for this ``RedisDataType``
+        instance already exists. Otherwise ``False``.
+        """
+        return self._client.exists(self.key)
+    
     def type(self):
         """Return the internal name of a datatype. (Specific to Redis)
         """ 
@@ -711,9 +718,6 @@ class Dict(RedisDataType, MutableMapping):
     
     def __str__(self):
         return str(self.__repr__())
-    
-    def __repr__(self):
-        return self._client.hgetall(self.key)
         
     #===========================================================================
     # Native set methods
