@@ -3,7 +3,7 @@
 All native datatypes.
 """
 
-__version__ = '0.1'
+__version__ = '0.11'
 __author__ = 'Peter Geil'
 
 from collections import MutableMapping, Sequence

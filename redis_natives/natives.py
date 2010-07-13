@@ -2,7 +2,7 @@
 Main module with the ``RedisNativeFactory``. 
 """
 
-__version__ = '0.1'
+__version__ = '0.11'
 __author__ = 'Peter Geil'
 
 from functools import partial

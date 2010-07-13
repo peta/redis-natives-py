@@ -7,7 +7,7 @@
 @brief Setuptools configuration for redis-natives-py
 """
 
-version = '0.1'
+version = '0.11'
 
 sdict = {
     'name' : 'redis_natives',
