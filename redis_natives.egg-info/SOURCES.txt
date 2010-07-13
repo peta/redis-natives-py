@@ -1,0 +1,16 @@
+CHANGES
+INSTALL
+LICENSE
+MANIFEST.in
+README
+README.md
+setup.py
+redis_natives/__init__.py
+redis_natives/annotations.py
+redis_natives/datatypes.py
+redis_natives/errors.py
+redis_natives/natives.py
+redis_natives.egg-info/PKG-INFO
+redis_natives.egg-info/SOURCES.txt
+redis_natives.egg-info/dependency_links.txt
+redis_natives.egg-info/top_level.txt

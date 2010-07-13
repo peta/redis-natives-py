@@ -1,0 +1,20 @@
+Metadata-Version: 1.1
+Name: redis-natives
+Version: 0.1
+Summary: Exposes Redis entities as native Python datatypes. Simple, plain but powerful. Supports namespacing, indexing, and some more.
+Home-page: http://github.com/peta/redis-natives-py
+Author: Peter Geil
+Author-email: code@petergeil.name
+License: BSD
+Download-URL: http://github.com/downloads/peta/redis-natives-py/redis-natives-py-0.1.zip
+Description: A thin abstraction layer on top of redis-py that exposes Redis entities as native Python datatypes. Simple, plain but powerful. No ORMing or model-messing.
+Keywords: Redis,key-value store,redis-py,datatypes,natives,helper
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Database
+Requires: redis (>=2.0)
