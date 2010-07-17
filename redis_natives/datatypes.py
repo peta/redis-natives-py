@@ -1004,7 +1004,7 @@ class Sequence(RedisSortable, Sequence):
         """
         return self._client.rpop(self.key)
     
-    def bpop_head(self, timeout, *keys):
+    def bpop_head(self, keys=[], timeout=0):
         """
         ``pop_tail`` a value off of the first non-empty list named in the 
         ``keys`` list and return it together with the ``key`` that unblocked 
