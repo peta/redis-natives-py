@@ -1034,9 +1034,7 @@ class Sequence(RedisSortable, Sequence):
         """
         # For more informations about blocking operations see:
         # ---> http://code.google.com/p/redis/wiki/BlpopCommand
-        k = [self.key]
-        k.extend(keys)
-        return self._client.brpop(k, timeout)
+        return self._client.brpop(keys.insert(0, self.key), timeout)
     
     def pop_tail_push_head(self, dstKey):
         """
