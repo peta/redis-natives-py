@@ -8,7 +8,6 @@ __author__ = 'Peter Geil'
 from functools import partial
 
 from redis_natives import datatypes
-from redis_natives.datatypes import Primitive
 
 
 class RedisNativeFactory(object):

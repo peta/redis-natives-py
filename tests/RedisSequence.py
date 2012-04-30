@@ -26,18 +26,18 @@ class SequenceTest(unittest.TestCase):
         del self.client
 
     def testNew(self):
-        rl = Sequence(self.testKey, self.client)
+        rl = Sequence(self.client, self.testKey)
         self.assertEqual(0, len(self.client.keys("*")),
                          "Created db-keys although created without initial values")
         
     def testNewWithReset(self):
         self.client.lpush(self.testKey, "foo")
-        rl = Sequence(self.testKey, self.client, reset=True)
+        rl = Sequence(self.client, self.testKey, reset=True)
         self.assertEqual(0, len(self.client.keys("*")),
                          "Created db-keys although created without initial values")
     
     def testReversed(self):
-        rl = Sequence(self.testKey, self.client)        
+        rl = Sequence(self.client, self.testKey)
         map(rl.push_tail, self.testElements)
         
         revRl, revTest = rl.__reversed__(), self.testElements.__reversed__()        
@@ -47,7 +47,7 @@ class SequenceTest(unittest.TestCase):
         self.assertRaises(StopIteration, revRl.next)
 
     def testPushHead(self):
-        rl = Sequence(self.testKey, self.client)
+        rl = Sequence(self.client, self.testKey)
          
         for el in self.testElements:
             rl.push_head(el)
@@ -56,7 +56,7 @@ class SequenceTest(unittest.TestCase):
             self.assertEqual(el, rl[0], "Element at index '0' should be equal the one pushed to head lastly")
         
     def testPushTail(self):
-        rl = Sequence(self.testKey, self.client)
+        rl = Sequence(self.client, self.testKey)
          
         for idx, el in enumerate(self.testElements):
             rl.push_tail(el)
@@ -66,8 +66,8 @@ class SequenceTest(unittest.TestCase):
             self.assertEqual(1, rl.count(el), "Each test element should appear only once")
         
     def testPopTailPushHead(self):
-        rl = Sequence(self.testKey, self.client)        
-        dst = Sequence("foo", self.client)
+        rl = Sequence(self.client, self.testKey)
+        dst = Sequence(self.client, "foo")
         map(rl.push_tail, self.testElements)
         
         for el in self.testElements:
