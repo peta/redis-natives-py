@@ -3,8 +3,8 @@
 All native datatypes.
 """
 
-__version__ = '0.11'
-__author__ = 'Peter Geil'
+__version__ = '0.12'
+__author__ = 'Peter Geil, updates by Chris Ridenour'
 
 from collections import MutableMapping, Sequence
 from time import time
@@ -47,8 +47,9 @@ class RedisDataType(object):
         
     @property
     def key(self):
-        '''The database-internal key name of this object
-        '''
+        """
+        The database-internal key name of this object
+        """
         return self._key
     
     @key.setter
@@ -72,7 +73,7 @@ class RedisDataType(object):
         index ``target``.
         """
         if isinstance(target, Redis):
-            dbIndex = target.db
+            dbIndex = target.connection_pool.get_connection('').db
         elif isinstance(target, (int, long)):
             dbIndex = target
         else:
@@ -85,11 +86,11 @@ class RedisDataType(object):
         oldKey = self.key
         if overwrite:
             if self._client.rename(oldKey, newKey):
-                self.key = newKey
+                self._key = newKey
                 return True
         else:
             if self._client.renamenx(oldKey, newKey):
-                self.key = newKey
+                self._key = newKey
                 return True
         return False
     
@@ -208,7 +209,6 @@ class Primitive(RedisDataType):
         '''
         Increment the value by value ``by``. (1 by default)
         '''
-        # Should I check for by-value and use 'incr' when appropriate?
         try:
             return self._client.incr(self.key, by)
         except ResponseError:
@@ -219,9 +219,8 @@ class Primitive(RedisDataType):
         '''
         Decrement the value by value ``by``. (1 by default)
         '''
-        # Should I check for by-value and use 'decr' when appropriate?
         try:
-            return self._client.decrby(self.key, by)
+            return self._client.decr(self.key, by)
         except ResponseError:
             raise RedisTypeError(
                 "Cannot decrement Primitive with string-value")
@@ -367,7 +366,7 @@ class Set(RedisSortable):
         """
         if not self._client.srem(self.key, el):
             raise RedisKeyError("Redis#%s, %s: Element '%s' doesn't exist" % \
-                                (self._client.db, self.key, el))
+                                (self._client.connection_pool.get_connection('').db, self.key, el))
             
     def symmetric_difference(self, *others):
         """
@@ -472,7 +471,7 @@ class ZOrder(object):
     """
     Enum with supported sort orders of ZSet
     """        
-    def __new__(self):
+    def __new__(cls):
         return ZOrder
     
     @property
@@ -507,7 +506,7 @@ class ZSet(RedisSortable):
     #=========================================================================== 
      
     def __len__(self):
-        return self._client.scard(self.key)
+        return self._client.zcard(self.key)
     
     def __contains__(self, value):
         # TODO: Remove __contains__ method due to inefficiency?
@@ -557,7 +556,7 @@ class ZSet(RedisSortable):
         Remove ``member`` form this set; 
         Do nothing when element is not a member
         """
-        self._client.srem(self.key, member)
+        self._client.zrem(self.key, member)
     
     def copy(self, key):
         """
@@ -565,7 +564,7 @@ class ZSet(RedisSortable):
         """
         # TODO: Return native set-object instead of bound redis item?
         self._client.zunionstore(key, [self.key])
-        return ZSet(key, self._client)
+        return ZSet(self._client, key)
     
     def clear(self):
         """
@@ -698,7 +697,7 @@ class Dict(RedisDataType, MutableMapping):
     def __contains__(self, key):
         return self._client.hexists(self.key, key)
     
-    def __getattr__(self, name):
+    def __getattr__(self, key):
         # Kinda magic-behaviour
         return self._client.hget(self.key, key)
     
@@ -759,8 +758,12 @@ class Dict(RedisDataType, MutableMapping):
     #   - popitem
     #   - popdef
     
-    def setdefault(self):
-        raise NotImplementedError("Method 'setdefault' is not yet implemented")
+    def setdefault(self, key, default=None):
+        try:
+            return self[key]
+        except RedisKeyError:
+            self[key] = default
+        return default
     
     def update(self, other, **others):
         pairs = []
@@ -773,7 +776,7 @@ class Dict(RedisDataType, MutableMapping):
         for k in others:
             pairs.extend((k, others[k]))
         # Using redis' bulk-hash-setter
-        self._client.hsset(self.key, pairs)
+        self._client.hmset(self.key, pairs)
     
     def values(self):
         return self._client.hvals(self.key)
@@ -829,16 +832,16 @@ class List(RedisSortable, Sequence):
         return self._client.lrange(self.key, 0, -1).reverse()
     
     def __getitem__(self, idx):
-        return self.client.lindex(self.key, idx)
+        return self._client.lindex(self.key, idx)
     
     def __setitem__(self, idx, el):
         try:
             self._client.lset(self.key, idx, el)
-        except redis.ResponseError:
+        except ResponseError:
             raise IndexError("Index out of range")
         
     # __delitem__ cannot be implemented (yet) without sideeffects
-    def __delitem__(self):
+    def __delitem__(self, idx):
         raise NotImplementedError("Method '__delitem__' not implemented yet")    
         
     #===========================================================================
