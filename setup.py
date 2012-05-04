@@ -23,7 +23,7 @@ sdict = {
     'keywords' : ['Redis', 'key-value store', 'redis-py', 'datatypes', 'natives', 'helper'],
     'license' : 'BSD',
     'packages' : ['redis_natives'],
-	'requires': ['redis (>=2.0)'],
+	'requires': ['redis (>=2.4)'],
     'test_suite' : 'tests.all_tests',
     'classifiers' : [
         'Development Status :: 4 - Beta',
