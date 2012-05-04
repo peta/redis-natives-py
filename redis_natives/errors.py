@@ -2,7 +2,7 @@
 Exceptions thrown by ``redis_natives``.
 '''
 
-__version__ = '0.1'
+__version__ = '0.12'
 __author__ = 'Peter Geil'
 
 class RedisTypeError(TypeError):
