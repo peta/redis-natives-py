@@ -1,4 +1,4 @@
 * 0.1 Initial release, 07/08/10
-
-* 0.1.1 - released 07/15/10
+* 0.11 - released 07/15/10
+* 0.12 - made it compatible to latest version of redis-py and minor cleanups 05/04/12
 
