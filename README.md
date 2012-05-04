@@ -30,9 +30,9 @@ persistence/database layer.
 ### What about performance in general? ###
 
 I wrote _redis-natives-py_ with performance in mind. I tried to avoid expensive operations where
-I could what resulted in an optimized and refactored piece of code that tries to exploit Redis
+I could what resulted in a solid piece of code that tries to exploit Redis
 capabilities as best and efficient as possible while keeping its memory footprint
-as small as possible. Reliable profiling result and further code improvements will follow.
+as small as possible.
 
 When you have questions or problems with _redis-natives-py_ please contact me via email or
 file a bug/ticket in the issue tracker.
@@ -163,8 +163,8 @@ processings. (stacks/queues)
 # Examples - Annotations & RedisNativeFactory #
 
 When you work with with ``redis_natives`` it might become odd to everytime pass in an instance of ``redis.Redis`` or 
-to keep track created keys. Even more when you work with pseudo-namespaces (f.e. "global:counter:message") and construct 
-the key names in advance. That's why I introduced ``annotations`` that can be applied to a custom ``RedisNativeFactory`` 
+to keep track of all created keys. Even more when you work with pseudo-namespaces (f.e. "global:counter:message") and construct 
+the key names in advance. That's why I introduced ``annotations`` which can be applied to a custom ``RedisNativeFactory`` 
 subclass.
 
 ## RedisNativeFactory ##
@@ -182,7 +182,7 @@ the returned instance (basically a constructor function) under an appropriately 
 ## @namespaced(ns, sep=":") ##
 
 To implicitly embed created keys in one or more namespaces, you use the annotation called ``namespaced(ns, sep=":")``.
-They're applied using the decorator syntax to you custom ``RedisNativeFactory`` subclass. Namespaces are constructed from 
+They're applied using the decorator syntax to your custom ``RedisNativeFactory`` subclass. Namespaces are constructed from 
 top to bottowm whereat you can combine as many namespaces as you like.
 
 	from rn.natives import RedisNativeFactory
@@ -233,7 +233,7 @@ __Note Redis' [special handling of volatile keys](http://code.google.com/p/redis
 
 ## @indexed(idxSet) ##
 
-When you keep reversed/additional indexes of certain entities the annotation called ``indexed(idxSet)`` will be handy for you. 
+When you must keep reversed/additional indexes of certain entities, the annotation called ``indexed(idxSet)`` will be handy for you. 
 For every entity created by the annotated ``RedisNativeFactory`` it will automatically add the entity's key to the given Redis ``Set`` 
 ``idxSet``.
 
@@ -307,7 +307,3 @@ representation of itself that will be used as key name.
 _Note that ``latestKey.key`` has 100 as suffix just because the annotation ``incremental`` was applied before ``autonamed``. Switch 
 their order, and ``latestKey.key`` will have the same suffix as the message body._
 
-# Demo: URL shorter service (Will follow soon) #
-
-Interesting demo project that shows how to use _redis-natives-py_ together with [bottle.py]() 
-in order to write a full-fledged URL shortener service that even offers hit tracking and statistics.
