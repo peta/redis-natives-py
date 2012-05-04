@@ -3,11 +3,11 @@
 """
 @file setup.py
 @author Peter Geil
-@date 8/7/2010
+@date 04/05/2012
 @brief Setuptools configuration for redis-natives-py
 """
 
-version = '0.11'
+version = '0.12'
 
 sdict = {
     'name' : 'redis_natives',
