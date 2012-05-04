@@ -2,7 +2,7 @@
 Annotations/hooks that alter the creation process of ``Redis natives``. 
 """
 
-__version__ = '0.11'
+__version__ = '0.12'
 __author__ = 'Peter Geil'
 
 from functools import partial
