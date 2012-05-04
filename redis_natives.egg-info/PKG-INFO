@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: redis-natives
-Version: 0.1
+Version: 0.12
 Summary: Exposes Redis entities as native Python datatypes. Simple, plain but powerful. Supports namespacing, indexing, and some more.
 Home-page: http://github.com/peta/redis-natives-py
 Author: Peter Geil
@@ -17,4 +17,4 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: License :: OSI Approved :: BSD License
 Classifier: Programming Language :: Python
 Classifier: Topic :: Database
-Requires: redis (>=2.0)
+Requires: redis (>=2.4)
