@@ -509,8 +509,7 @@ class ZSet(RedisSortable):
         return self._client.zcard(self.key)
     
     def __contains__(self, value):
-        # TODO: Remove __contains__ method due to inefficiency?
-        return value in self._client.zrange(self.key, 0, -1)
+        return self.score_of(value) is not None
     
     def __and__(self, other):
         return self._client.zrange(self.key, 0, -1) and other
@@ -613,24 +612,27 @@ class ZSet(RedisSortable):
         """
         return self._client.zscore(self.key, el)
     
-    def range_by_rank(self, min, max, order=ZOrder.ASC):
+    def range_by_rank(self, min, max, order=ZOrder.ASC, withscores=False):
         """
         Return a range of elements from the sorted set by specifying ``min``
         and ``max`` ordinal indexes, whereas the sortation is based on 
         scores and ordered according to the given ``order`` enum. 
         """
         if (order == ZOrder.ASC):
-            return self._client.zrange(self.key, min, max)
+            return self._client.zrange(self.key, min, max, withscores=withscores)
         elif (order == ZOrder.DESC):
-            return self._client.zrevrange(self.key, min, max)
+            return self._client.zrevrange(self.key, min, max, withscores=withscores)
     
-    def range_by_score(self, min, max):
+    def range_by_score(self, min, max, order=ZOrder.ASC, withscores=False):
         """
         Return a range of elements from the sorted set by specifying ``min``
         and ``max`` score values, whereas the sortation is based on scores 
         with a descending order.
         """
-        return self._client.zrangebyscore(self.key, min, max)
+        if (order == ZOrder.ASC):        
+            return self._client.zrangebyscore(self.key, min, max, withscores=withscores)
+        elif (order == ZOrder.DESC):
+            return self._client.zrevrangebyscore(self.key, max, min, withscores=withscores)
 
     def grab(self):
         """
